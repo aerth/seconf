@@ -2,7 +2,7 @@ package seconf
 
 import (
 	"golang.org/x/crypto/nacl/secretbox"
-  "github.com/gcmurphy/getpass"
+  "github.com/bgentry/speakeasy"
   "os"
   "strings"
   "fmt"
@@ -98,12 +98,12 @@ func Create(secustom string) {
   bar(secustom)
 
 	fmt.Println("Enter Password. It will not be stored plaintext.")
-	password, _ = getpass.GetPass()
+	password, _ = speakeasy.Ask("Password: ")
 	if password == "" {
-		password, _ = getpass.GetPass()
+		password, _ = speakeasy.Ask("Password: ")
 	} // try 2
 	if password == "" {
-		password, _ = getpass.GetPass()
+		password, _ = speakeasy.Ask("Password: ")
 	} // try 3
 	if password == "" {
 		fmt.Println("Need real password. Try again.")
@@ -113,10 +113,10 @@ func Create(secustom string) {
 	fmt.Println("Enter a local config password.")
 	fmt.Println("It will be used to encrypt your config file, saved at "+os.Getenv("HOME")+"/."+secustom)
 	fmt.Println("Don't forget this password!")
-	configlock, _ = getpass.GetPass()
+	configlock, _ = speakeasy.Ask("Password: ")
 	if configlock == "" {
 		fmt.Println("Press ENTER again for a blank password.")
-		configlock, _ = getpass.GetPass()
+		configlock, _ = speakeasy.Ask("Password: ")
 	} // confirm empty password
 	bar(secustom)
 	var userKey = configlock
@@ -157,7 +157,7 @@ func Detect(secustom string) bool {
 func Read(secustom string) (configuser string, configpass string, err error) {
 	bar(secustom)
 	fmt.Println("Unlocking config file")
-	configlock, err = getpass.GetPass()
+	configlock, err = speakeasy.Ask("Password: ")
 	bar(secustom)
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
