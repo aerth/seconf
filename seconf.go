@@ -100,8 +100,28 @@ func Create(secustom string, servicename string, arg ...string) {
 			if configfields.Args[i][0:4] == "pass" {
 				fmt.Printf("\n### " + servicename + " ###\n")
 				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":")
+				if m1[i] == "" { 		bar(secustom); m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":") }
+				if m1[i] == "" { 		bar(secustom); m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":") }
+				if m1[i] == "" { 		bar(secustom); fmt.Println(configfields.Args[i]+" cannot be blank.")
+					os.Exit(1)
+				 }
+
+
 			} else {
 				m1[i] = Prompt(configfields.Args[i])
+				if m1[i] == "" {
+							bar(secustom)
+					m1[i] = Prompt(configfields.Args[i])
+				}
+				if m1[i] == "" {
+							bar(secustom)
+					m1[i] = Prompt(configfields.Args[i])
+				}
+				if m1[i] == "" {
+							bar(secustom)
+					fmt.Println(configfields.Args[i]+" cannot be blank.")
+					os.Exit(1)
+				}
 			}
 		} else {
 			m1[i] = Prompt(configfields.Args[i])
