@@ -36,25 +36,6 @@ type Fielder struct {
 	Password bool
 }
 
-/*
-func main() {
-// command: seconf create
-if os.Args[1] == "config" {
-
-  if Detect(s) == false {
-    fmt.Println("Creating config file. You will be asked for your user,and password.")
-    fmt.Println("Your password will NOT echo.\n")
-    Create()
-  } else {
-    fmt.Println("Config file already exists.\nIf you want to create a new config file, move or delete the existing one.\n")
-    fmt.Println(os.Getenv("HOME") + "/."+secustom+"\n")
-    os.Exit(1)
-  }
-}
-
-}
-
-*/
 func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
@@ -95,7 +76,6 @@ func Prompt(header string) string {
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		line := scanner.Text()
-		//	fmt.Println(line)
 		return line
 	}
 	if err := scanner.Err(); err != nil {
@@ -192,11 +172,6 @@ func Read(secustom string) (config string, err error) {
 		fmt.Println("Could not decrypt the config file. Wrong password?")
 		os.Exit(1)
 	}
-	//configstrings := strings.Split(string(configbytes), "::::")
-
-	//	username = configstrings[0]
-	//	password = configstrings[1]
-
 	return string(configbytes), nil
 
 }

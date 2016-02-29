@@ -41,10 +41,6 @@ if !seconf.Detect(s) {
     fmt.Printf("Your %s is %s \n", os.Args[3], configarray[0])
     fmt.Printf("Your %s is %s \n", os.Args[4], configarray[1])
     fmt.Printf("Your %s is %s \n", os.Args[5], configarray[2])
-  //  fmt.Printf("Your %s is %s \n", os.Args[4], configarray[3])
-
-    //fmt.Println("Your password is: "+p)
-
 
   }
 }
