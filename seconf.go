@@ -117,12 +117,12 @@ func Create(secustom string, servicename string, arg ...string) {
 	for i := range configfields.Args {
 		bar(secustom)
 		if len(configfields.Args[i]) > 4 {
-				if configfields.Args[i][0:4] == "pass" {
-						fmt.Printf("\n### " + servicename + " ###\n")
-					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":")
-				}else {
-					m1[i] = Prompt(configfields.Args[i])
-				} 
+			if configfields.Args[i][0:4] == "pass" {
+				fmt.Printf("\n### " + servicename + " ###\n")
+				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":")
+			} else {
+				m1[i] = Prompt(configfields.Args[i])
+			}
 		} else {
 			m1[i] = Prompt(configfields.Args[i])
 		}
