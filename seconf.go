@@ -23,6 +23,19 @@ var configuser = ""
 var configpass = ""
 
 var configlock = ""
+
+type Seconf struct {
+Id	int64
+Path string
+Args []string
+
+}
+type Fielder struct {
+Id int64
+Name string
+Password bool
+
+}
 /*
 func main() {
 // command: seconf create
@@ -92,36 +105,40 @@ func Prompt(header string) string {
 	return ""
 }
 
-func Create(secustom string) {
-  bar(secustom)
-	username = Prompt("What username? Example: john")
-  bar(secustom)
 
-	fmt.Println("Enter Password. It will not be stored plaintext.")
-	password, _ = speakeasy.Ask("Password: ")
-	if password == "" {
-		password, _ = speakeasy.Ask("Password: ")
-	} // try 2
-	if password == "" {
-		password, _ = speakeasy.Ask("Password: ")
-	} // try 3
-	if password == "" {
-		fmt.Println("Need real password. Try again.")
-		os.Exit(1)
-	} // we tried.
+func Create(secustom string, arg ...string) {
+	  bar(secustom)
+	configfields := &Seconf{
+		Path: secustom,
+		Args: arg,
+	}
+var concat []string
+	for i := range configfields.Args {
+		fmt.Println(configfields.Args[i])
+		concat = append(concat, configfields.Args[i])
+
+	}
+//	var yess []string
+	var m1 map[int]string = map[int]string{}
+	var newsplice []string
+	for i := range configfields.Args {
+		bar(secustom)
+	//key := fmt.Sprintf("variable%d", i)
+	if configfields.Args[i][0:4] == "pass" {
+		m1[i], _ = speakeasy.Ask(secustom+" Password: ")
+	}else {
+	m1[i] =	Prompt(concat[i]) }
+	newsplice = append(newsplice, m1[i]+"::::")
+	}
+	//os.Exit(1)
   bar(secustom)
-	fmt.Println("Enter a local config password.")
-	fmt.Println("It will be used to encrypt your config file, saved at "+os.Getenv("HOME")+"/."+secustom)
-	fmt.Println("Don't forget this password!")
-	configlock, _ = speakeasy.Ask("Password: ")
-	if configlock == "" {
-		fmt.Println("Press ENTER again for a blank password.")
-		configlock, _ = speakeasy.Ask("Password: ")
-	} // confirm empty password
-	bar(secustom)
+	configlock, _ := speakeasy.Ask("Config File Password: ")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
-	var message = []byte(username + "::::" + password)
+	//var message = []byte(m1[0])
+	var messagebox = strings.Join(newsplice, "")
+	messagebox = strings.TrimSuffix(messagebox, "::::")
+	var message = []byte(messagebox)
 	key := []byte(userKey)
 	key = append(key, pad...)
 	naclKey := new([keySize]byte)
@@ -154,7 +171,7 @@ func Detect(secustom string) bool {
 	return true
 }
 
-func Read(secustom string) (configuser string, configpass string, err error) {
+func Read(secustom string) (config string, err error) {
 	bar(secustom)
 	fmt.Println("Unlocking config file")
 	configlock, err = speakeasy.Ask("Password: ")
@@ -177,12 +194,12 @@ func Read(secustom string) (configuser string, configpass string, err error) {
 		fmt.Println("Could not decrypt the config file. Wrong password?")
     os.Exit(1)
 	}
-	configstrings := strings.Split(string(configbytes), "::::")
+	//configstrings := strings.Split(string(configbytes), "::::")
 
-	username = configstrings[0]
-	password = configstrings[1]
+//	username = configstrings[0]
+//	password = configstrings[1]
 
-	return username, password, nil
+	return string(configbytes), nil
 
 }
 func bar(secustom string){
