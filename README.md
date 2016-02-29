@@ -1,8 +1,15 @@
-# Work in progress.
+# seconf
 
-This library allows non-plaintext configuration files
+### This library allows non-plaintext configuration files.
+
+Currently, seconf saves the configuration file as a "::::" separated list. It would probably better to use JSON or something.
+I created this for go-quitter, so that the username and password would not be stored in plaintext. If your app can use it, go ahead! Things may change/break.
+
 
 copyright (c) 2016 aerth@sdf.org
+
+
+### Example
 
 ```
 
