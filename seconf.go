@@ -1,19 +1,20 @@
 package seconf
 
 import (
-	"golang.org/x/crypto/nacl/secretbox"
-  "github.com/bgentry/speakeasy"
-  "os"
-  "strings"
-  "fmt"
-  "bufio"
-  "io/ioutil"
-  "io"
+	"bufio"
 	"crypto/rand"
-  )
+	"fmt"
+	"github.com/bgentry/speakeasy"
+	"golang.org/x/crypto/nacl/secretbox"
+	"io"
+	"io/ioutil"
+	"os"
+	"strings"
+)
 
 const keySize = 32
 const nonceSize = 24
+
 var secustom string
 var username = os.Getenv("USER")
 var password = os.Getenv("SECONFPASS")
@@ -25,17 +26,16 @@ var configpass = ""
 var configlock = ""
 
 type Seconf struct {
-Id	int64
-Path string
-Args []string
-
+	Id   int64
+	Path string
+	Args []string
 }
 type Fielder struct {
-Id int64
-Name string
-Password bool
-
+	Id       int64
+	Name     string
+	Password bool
 }
+
 /*
 func main() {
 // command: seconf create
@@ -90,8 +90,8 @@ func posString(slice []string, element string) int {
 }
 
 func Prompt(header string) string {
-  fmt.Printf("\n### "+header+" ###\n")
-  fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
+	fmt.Printf("\n### " + header + " ###\n")
+	fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		line := scanner.Text()
@@ -105,33 +105,33 @@ func Prompt(header string) string {
 	return ""
 }
 
-
 func Create(secustom string, arg ...string) {
-	  bar(secustom)
+	bar(secustom)
 	configfields := &Seconf{
 		Path: secustom,
 		Args: arg,
 	}
-var concat []string
+	var concat []string
 	for i := range configfields.Args {
 		fmt.Println(configfields.Args[i])
 		concat = append(concat, configfields.Args[i])
 
 	}
-//	var yess []string
+	//	var yess []string
 	var m1 map[int]string = map[int]string{}
 	var newsplice []string
 	for i := range configfields.Args {
 		bar(secustom)
-	//key := fmt.Sprintf("variable%d", i)
-	if configfields.Args[i][0:4] == "pass" {
-		m1[i], _ = speakeasy.Ask(secustom+" Password: ")
-	}else {
-	m1[i] =	Prompt(concat[i]) }
-	newsplice = append(newsplice, m1[i]+"::::")
+		//key := fmt.Sprintf("variable%d", i)
+		if configfields.Args[i][0:4] == "pass" {
+			m1[i], _ = speakeasy.Ask(secustom + " Password: ")
+		} else {
+			m1[i] = Prompt(concat[i])
+		}
+		newsplice = append(newsplice, m1[i]+"::::")
 	}
 	//os.Exit(1)
-  bar(secustom)
+	bar(secustom)
 	configlock, _ := speakeasy.Ask("Config File Password: ")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
@@ -164,7 +164,7 @@ var concat []string
 }
 
 func Detect(secustom string) bool {
-	_, err := ioutil.ReadFile(os.Getenv("HOME") + "/."+secustom)
+	_, err := ioutil.ReadFile(os.Getenv("HOME") + "/." + secustom)
 	if err != nil {
 		return false
 	}
@@ -183,7 +183,7 @@ func Read(secustom string) (config string, err error) {
 	naclKey := new([keySize]byte)
 	copy(naclKey[:], key[:keySize])
 	nonce := new([nonceSize]byte)
-	in, err := ioutil.ReadFile(os.Getenv("HOME") + "/."+secustom)
+	in, err := ioutil.ReadFile(os.Getenv("HOME") + "/." + secustom)
 	if err != nil {
 		fmt.Println(err)
 
@@ -192,18 +192,18 @@ func Read(secustom string) (config string, err error) {
 	configbytes, ok := secretbox.Open(nil, in[nonceSize:], nonce, naclKey)
 	if !ok {
 		fmt.Println("Could not decrypt the config file. Wrong password?")
-    os.Exit(1)
+		os.Exit(1)
 	}
 	//configstrings := strings.Split(string(configbytes), "::::")
 
-//	username = configstrings[0]
-//	password = configstrings[1]
+	//	username = configstrings[0]
+	//	password = configstrings[1]
 
 	return string(configbytes), nil
 
 }
-func bar(secustom string){
-  versionbar := strings.Repeat("#", 10) + "\t" + secustom + "\t" + strings.Repeat("#", 30)
-  print("\033[H\033[2J")
-  fmt.Println(versionbar)
+func bar(secustom string) {
+	versionbar := strings.Repeat("#", 10) + "\t" + secustom + "\t" + strings.Repeat("#", 30)
+	print("\033[H\033[2J")
+	fmt.Println(versionbar)
 }
