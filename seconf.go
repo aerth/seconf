@@ -105,37 +105,35 @@ func Prompt(header string) string {
 	return ""
 }
 
-func Create(secustom string, arg ...string) {
+func Create(secustom string, servicename string, arg ...string) {
 	bar(secustom)
 	configfields := &Seconf{
 		Path: secustom,
 		Args: arg,
 	}
-	var concat []string
-	for i := range configfields.Args {
-		fmt.Println(configfields.Args[i])
-		concat = append(concat, configfields.Args[i])
 
-	}
-	//	var yess []string
 	var m1 map[int]string = map[int]string{}
 	var newsplice []string
 	for i := range configfields.Args {
 		bar(secustom)
-		//key := fmt.Sprintf("variable%d", i)
-		if configfields.Args[i][0:4] == "pass" {
-			m1[i], _ = speakeasy.Ask(secustom + " Password: ")
+		if len(configfields.Args[i]) > 4 {
+				if configfields.Args[i][0:4] == "pass" {
+						fmt.Printf("\n### " + servicename + " ###\n")
+					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":")
+				}else {
+					m1[i] = Prompt(configfields.Args[i])
+				} 
 		} else {
-			m1[i] = Prompt(concat[i])
+			m1[i] = Prompt(configfields.Args[i])
 		}
 		newsplice = append(newsplice, m1[i]+"::::")
 	}
-	//os.Exit(1)
+
 	bar(secustom)
-	configlock, _ := speakeasy.Ask("Config File Password: ")
+	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password.")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
-	//var message = []byte(m1[0])
+
 	var messagebox = strings.Join(newsplice, "")
 	messagebox = strings.TrimSuffix(messagebox, "::::")
 	var message = []byte(messagebox)
