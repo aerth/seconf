@@ -86,7 +86,7 @@ func Prompt(header string) string {
 }
 
 func Create(secustom string, servicename string, arg ...string) {
-	bar(secustom)
+	bar(servicename)
 	configfields := &Seconf{
 		Path: secustom,
 		Args: arg,
@@ -95,10 +95,10 @@ func Create(secustom string, servicename string, arg ...string) {
 	var m1 map[int]string = map[int]string{}
 	var newsplice []string
 	for i := range configfields.Args {
-		bar(secustom)
+		bar(servicename)
 		if len(configfields.Args[i]) > 4 {
-			if configfields.Args[i][0:4] == "pass" {
-				fmt.Printf("\n### " + servicename + " ###\n")
+			if configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
+		//		fmt.Printf("\n### " + servicename + " ###\n")
 				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":")
 				if m1[i] == "" { 		bar(secustom); m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":") }
 				if m1[i] == "" { 		bar(secustom); m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":") }
@@ -110,15 +110,17 @@ func Create(secustom string, servicename string, arg ...string) {
 			} else {
 				m1[i] = Prompt(configfields.Args[i])
 				if m1[i] == "" {
-							bar(secustom)
+							bar(servicename)
+							fmt.Println("Can not be blank.")
 					m1[i] = Prompt(configfields.Args[i])
 				}
 				if m1[i] == "" {
-							bar(secustom)
+							bar(servicename)
+							fmt.Println("Can not be blank.")
 					m1[i] = Prompt(configfields.Args[i])
 				}
 				if m1[i] == "" {
-							bar(secustom)
+							bar(servicename)
 					fmt.Println(configfields.Args[i]+" cannot be blank.")
 					os.Exit(1)
 				}
@@ -129,7 +131,7 @@ func Create(secustom string, servicename string, arg ...string) {
 		newsplice = append(newsplice, m1[i]+"::::")
 	}
 
-	bar(secustom)
+	bar(servicename)
 	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password.")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
