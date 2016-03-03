@@ -16,8 +16,8 @@ const keySize = 32
 const nonceSize = 24
 
 var secustom string
-var username = os.Getenv("USER")
-var password = os.Getenv("SECONFPASS")
+var username string
+var password string
 var hashbar = strings.Repeat("#", 80)
 
 var configuser = ""
@@ -151,18 +151,18 @@ func Create(secustom string, servicename string, arg ...string) {
 	out := make([]byte, nonceSize)
 	copy(out, nonce[:])
 	out = secretbox.Seal(out, message, nonce, naclKey)
-	err = ioutil.WriteFile(os.Getenv("HOME")+"/."+secustom, out, 0600)
+	err = ioutil.WriteFile(ReturnHome()+"/."+secustom, out, 0600)
 	if err != nil {
 		fmt.Println("Error while writing config file: ", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Config file saved at "+os.Getenv("HOME")+"/."+secustom+" \nTotal size is %d bytes.\n",
+	fmt.Printf("Config file saved at "+ReturnHome()+"/."+secustom+" \nTotal size is %d bytes.\n",
 		len(out))
 	os.Exit(0)
 }
 
 func Detect(secustom string) bool {
-	_, err := ioutil.ReadFile(os.Getenv("HOME") + "/." + secustom)
+	_, err := ioutil.ReadFile(ReturnHome() + "/." + secustom)
 	if err != nil {
 		return false
 	}
@@ -181,7 +181,7 @@ func Read(secustom string) (config string, err error) {
 	naclKey := new([keySize]byte)
 	copy(naclKey[:], key[:keySize])
 	nonce := new([nonceSize]byte)
-	in, err := ioutil.ReadFile(os.Getenv("HOME") + "/." + secustom)
+	in, err := ioutil.ReadFile(ReturnHome() + "/." + secustom)
 	if err != nil {
 		fmt.Println(err)
 
@@ -199,4 +199,14 @@ func bar(secustom string) {
 	versionbar := strings.Repeat("#", 10) + "\t" + secustom + "\t" + strings.Repeat("#", 30)
 	print("\033[H\033[2J")
 	fmt.Println(versionbar)
+}
+func ReturnHome() (homedir string) {
+	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+	if homedir == "" {
+			homedir = os.Getenv("USERPROFILE")
+	}
+	if homedir == "" {
+			homedir = os.Getenv("HOME")
+	}
+return
 }
