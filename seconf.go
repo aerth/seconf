@@ -4,17 +4,19 @@ import (
 	"bufio"
 	"crypto/rand"
 	"fmt"
-	"github.com/bgentry/speakeasy"
-	"golang.org/x/crypto/nacl/secretbox"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/bgentry/speakeasy"
+	"golang.org/x/crypto/nacl/secretbox"
 )
 
 const keySize = 32
 const nonceSize = 24
 
+// secustom is the filename that gets stored. for example, if secustom is "test", the configuration file will be saved as $HOME/.test
 var secustom string
 var username string
 var password string
@@ -25,21 +27,28 @@ var configpass = ""
 
 var configlock = ""
 
+// Seconf is the struct for the seconf pathname and fields.
 type Seconf struct {
 	Id   int64
 	Path string
 	Args []string
 }
+
+/*
 type Fielder struct {
 	Id       int64
 	Name     string
 	Password bool
 }
+*/
 
+// constainsString returns true if a slice contains a string.
 func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
 
+// askForConfirmation returns true if the user types one of the "okayResponses"
+// https://gist.github.com/albrow/5882501
 func askForConfirmation() bool {
 	var response string
 	_, err := fmt.Scanln(&response)
@@ -61,6 +70,9 @@ func askForConfirmation() bool {
 		return askForConfirmation()
 	}
 }
+
+// posString returns the first index of element in slice.
+// If slice does not contain element, returns -1.
 func posString(slice []string, element string) int {
 	for index, elem := range slice {
 		if elem == element {
@@ -70,6 +82,7 @@ func posString(slice []string, element string) int {
 	return -1
 }
 
+// Prompt the user for the particular field.
 func Prompt(header string) string {
 	fmt.Printf("\n### " + header + " ###\n")
 	fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
@@ -85,6 +98,7 @@ func Prompt(header string) string {
 	return ""
 }
 
+// Create initializes a new configuration file, at $HOME/secustom with the title servicename and as many fields as needed. Any field starting with "pass" will be assumed a password and input will not be echoed.
 func Create(secustom string, servicename string, arg ...string) {
 	bar(servicename)
 	configfields := &Seconf{
@@ -98,30 +112,37 @@ func Create(secustom string, servicename string, arg ...string) {
 		bar(servicename)
 		if len(configfields.Args[i]) > 4 {
 			if configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
-		//		fmt.Printf("\n### " + servicename + " ###\n")
+				//		fmt.Printf("\n### " + servicename + " ###\n")
 				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":")
-				if m1[i] == "" { 		bar(secustom); m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":") }
-				if m1[i] == "" { 		bar(secustom); m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":") }
-				if m1[i] == "" { 		bar(secustom); fmt.Println(configfields.Args[i]+" cannot be blank.")
+				if m1[i] == "" {
+					bar(secustom)
+					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":")
+				}
+				if m1[i] == "" {
+					bar(secustom)
+					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ":")
+				}
+				if m1[i] == "" {
+					bar(secustom)
+					fmt.Println(configfields.Args[i] + " cannot be blank.")
 					os.Exit(1)
-				 }
-
+				}
 
 			} else {
 				m1[i] = Prompt(configfields.Args[i])
 				if m1[i] == "" {
-							bar(servicename)
-							fmt.Println("Can not be blank.")
+					bar(servicename)
+					fmt.Println("Can not be blank.")
 					m1[i] = Prompt(configfields.Args[i])
 				}
 				if m1[i] == "" {
-							bar(servicename)
-							fmt.Println("Can not be blank.")
+					bar(servicename)
+					fmt.Println("Can not be blank.")
 					m1[i] = Prompt(configfields.Args[i])
 				}
 				if m1[i] == "" {
-							bar(servicename)
-					fmt.Println(configfields.Args[i]+" cannot be blank.")
+					bar(servicename)
+					fmt.Println(configfields.Args[i] + " cannot be blank.")
 					os.Exit(1)
 				}
 			}
@@ -163,6 +184,7 @@ func Create(secustom string, servicename string, arg ...string) {
 	os.Exit(0)
 }
 
+// Detect returns TRUE if a seconf file exists.
 func Detect(secustom string) bool {
 	_, err := ioutil.ReadFile(ReturnHome() + "/." + secustom)
 	if err != nil {
@@ -171,6 +193,7 @@ func Detect(secustom string) bool {
 	return true
 }
 
+// Read returns the decoded configuration file, or an error. Fields are separated by 4 colons. ("::::")
 func Read(secustom string) (config string, err error) {
 	bar(secustom)
 	fmt.Println("Unlocking config file")
@@ -197,18 +220,22 @@ func Read(secustom string) (config string, err error) {
 	return string(configbytes), nil
 
 }
+
+// Cheap and effective way of clearing screen on unix. Ugly on windows.
 func bar(secustom string) {
 	versionbar := strings.Repeat("#", 10) + "\t" + secustom + "\t" + strings.Repeat("#", 30)
 	print("\033[H\033[2J")
 	fmt.Println(versionbar)
 }
+
+// ReturnHome is a cross-OS way of getting a HOMEDIR.
 func ReturnHome() (homedir string) {
 	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
 	if homedir == "" {
-			homedir = os.Getenv("USERPROFILE")
+		homedir = os.Getenv("USERPROFILE")
 	}
 	if homedir == "" {
-			homedir = os.Getenv("HOME")
+		homedir = os.Getenv("HOME")
 	}
-return
+	return
 }
