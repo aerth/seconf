@@ -24,10 +24,10 @@
 //
 // check out the example application in _examples/hello for a working example.
 //
-// ```fmt.Println("Welcome to " + sn + ", " + configarray[0])
-// fmt.Printf("Your %s is %s \n", os.Args[3], configarray[0])
-// fmt.Printf("Your %s is %s \n", os.Args[4], configarray[1])
-// fmt.Printf("Your %s is %s \n", os.Args[5], configarray[2])```
+//		 fmt.Println("Welcome to " + sn + ", " + configarray[0])
+//		 fmt.Printf("Your %s is %s \n", os.Args[3], configarray[0])
+//		 fmt.Printf("Your %s is %s \n", os.Args[4], configarray[1])
+//		 fmt.Printf("Your %s is %s \n", os.Args[5], configarray[2])
 package seconf
 
 import (
