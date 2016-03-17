@@ -1,10 +1,11 @@
 # seconf
 
-### This library allows non-plaintext configuration files.
+### This library creates, detects, and reads non-plaintext configuration files.
+
+[![GoDoc](https://godoc.org/github.com/aerth/seconf?status.svg)](https://godoc.org/github.com/aerth/seconf)
 
 Currently, seconf saves the configuration file as a "::::" separated list. It would probably better to use JSON or something.
-I created this for go-quitter, so that the username and password would not be stored in plaintext. If your app can use it, go ahead! Things may change/break.
-
+I created this for go-quitter, so that the username and password would not be stored in plaintext. If your app can use it, go ahead! Things may change/break. [Cosgo](https://github.com/aerth/cosgo) also uses it.
 
 copyright (c) 2016 aerth@sdf.org
 
