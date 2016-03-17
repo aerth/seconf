@@ -21,8 +21,6 @@
 // SOFTWARE.
 
 // package seconf allows your software to store non-plaintext configuration files.
-package seconf
-
 // Here is an example application that stores and retrieves four fields.
 // The third field in this example begins with "pass" so is interpreted as a password and will not be echoed.
 //
@@ -80,6 +78,9 @@ package seconf
 //
 // ```
 //
+
+package seconf
+
 import (
 	"bufio"
 	"crypto/rand"
