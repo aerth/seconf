@@ -7,11 +7,15 @@
 [(Example)](https://github.com/aerth/seconf/blob/master/_examples/hello/main.go)
 
 
-seconf saves the configuration file as a `::::` separated list.
+seconf saves the configuration file as a `::::` separated list. for the encryption, i chose [(nacl/secretbox)](http://nacl.cr.yp.to/secretbox.html). theres a simple default pad that allows "empty" passwords. we use [bgentry/speakeasy](https://github.com/bgentry/speakeasy) for accepting user input for fields that start with "pass".
+
+```
+Secretbox uses XSalsa20 and Poly1305 to encrypt and authenticate messages with secret-key cryptography.
+```
 
 Future versions will store the values differently, using new functions, but the legacy functions will remain.
 
-I created this for [go-quitter](https://github.com/aerth/go-quitter), so that the username and password (and node) would not be stored in plain-text. If your app can use it, go ahead! [cosgo](https://github.com/aerth/cosgo) also uses it.
+I created this for GNU Social client [go-quitter](https://github.com/aerth/go-quitter), so that the username and password (and node) would not be stored in plain-text. If your app can use `seconf`, go ahead! my contact form [cosgo](https://github.com/aerth/cosgo) also uses it to store SMTP API keys.
 
 
 ```
