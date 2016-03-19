@@ -4,12 +4,38 @@
 
 [![GoDoc](https://godoc.org/github.com/aerth/seconf?status.svg)](https://godoc.org/github.com/aerth/seconf)
 
-Currently, seconf saves the configuration file as a `::::` separated list. For now, it works. It would probably better to use JSON or something.
-I created this for [go-quitter](https://github.com/aerth/go-quitter), so that the username and password (and node) would not be stored in plaintext. If your app can use it, go ahead! Things may change/break. [Cosgo](https://github.com/aerth/cosgo) also uses it.
-
-copyright (c) 2016 aerth@sdf.org
+[(Example)](https://github.com/aerth/seconf/blob/master/_examples/hello/main.go)
 
 
-### [(Example)](https://github.com/aerth/seconf/blob/master/_examples/hello/main.go)
+seconf saves the configuration file as a `::::` separated list.
+
+Future versions will store the values differently, using new functions, but the legacy functions will remain.
+
+I created this for [go-quitter](https://github.com/aerth/go-quitter), so that the username and password (and node) would not be stored in plain-text. If your app can use it, go ahead! [cosgo](https://github.com/aerth/cosgo) also uses it.
 
 
+```
+
+The MIT License (MIT)
+
+Copyright (c) 2016 aerth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
