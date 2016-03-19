@@ -84,7 +84,7 @@ func askForConfirmation() bool {
 	_, err := fmt.Scanln(&response)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return false
 	}
 	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 	nokayResponses := []string{"n", "N", "no", "No", "NO"}
@@ -123,7 +123,7 @@ func Prompt(header string) string {
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return Prompt(header)
 	}
 	return ""
 }
@@ -155,7 +155,7 @@ func Create(secustom string, servicename string, arg ...string) {
 				if m1[i] == "" {
 					bar(secustom)
 					fmt.Println(configfields.Args[i] + " cannot be blank.")
-					os.Exit(1)
+					return
 				}
 
 			} else {
@@ -173,7 +173,7 @@ func Create(secustom string, servicename string, arg ...string) {
 				if m1[i] == "" {
 					bar(servicename)
 					fmt.Println(configfields.Args[i] + " cannot be blank.")
-					os.Exit(1)
+					return
 				}
 			}
 		} else {
@@ -199,7 +199,7 @@ func Create(secustom string, servicename string, arg ...string) {
 	_, err := io.ReadFull(rand.Reader, nonce[:])
 	if err != nil {
 		fmt.Println("Could not read from random:", err)
-		os.Exit(1)
+		return
 	}
 	out := make([]byte, nonceSize)
 	copy(out, nonce[:])
@@ -207,7 +207,7 @@ func Create(secustom string, servicename string, arg ...string) {
 	err = ioutil.WriteFile(ReturnHome()+"/."+secustom, out, 0600)
 	if err != nil {
 		fmt.Println("Error while writing config file: ", err)
-		os.Exit(1)
+		return
 	}
 	fmt.Printf("Config file saved at "+ReturnHome()+"/."+secustom+" \nTotal size is %d bytes.\n",
 		len(out))
@@ -245,7 +245,7 @@ func Read(secustom string) (config string, err error) {
 	configbytes, ok := secretbox.Open(nil, in[nonceSize:], nonce, naclKey)
 	if !ok {
 		fmt.Println("Could not decrypt the config file. Wrong password?")
-		os.Exit(1)
+		return
 	}
 	return string(configbytes), nil
 
