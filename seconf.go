@@ -38,6 +38,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"errors"
 
 	"github.com/bgentry/speakeasy"
 	"golang.org/x/crypto/nacl/secretbox"
@@ -268,4 +269,83 @@ func ReturnHome() (homedir string) {
 		homedir = os.Getenv("HOME")
 	}
 	return
+}
+
+// Lock() is the new version of Create(), It returns any errors during the process instead of using os.Exit()
+func Lock(secustom string, servicename string, arg ...string) error {
+	bar(servicename)
+	configfields := &Seconf{
+		Path: secustom,
+		Args: arg,
+	}
+
+	var m1 map[int]string = map[int]string{}
+	var newsplice []string
+	for i := range configfields.Args {
+		bar(servicename)
+		if len(configfields.Args[i]) > 4 {
+			if configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
+				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
+				if m1[i] == "" {
+					bar(servicename)
+					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
+				}
+				if m1[i] == "" {
+					bar(servicename)
+					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
+				}
+				if m1[i] == "" {
+					bar(servicename)
+					return errors.New(configfields.Args[i] + " cannot be blank.")
+				}
+
+			} else {
+				m1[i] = Prompt(configfields.Args[i])
+				if m1[i] == "" {
+					bar(servicename)
+					fmt.Println("Can not be blank.")
+					m1[i] = Prompt(configfields.Args[i])
+				}
+				if m1[i] == "" {
+					bar(servicename)
+					fmt.Println("Can not be blank.")
+					m1[i] = Prompt(configfields.Args[i])
+				}
+				if m1[i] == "" {
+					bar(servicename)
+					return errors.New(configfields.Args[i] + " cannot be blank.")
+				}
+			}
+		} else {
+			m1[i] = Prompt(configfields.Args[i])
+		}
+		newsplice = append(newsplice, m1[i]+"::::")
+	}
+	bar(servicename)
+	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password.")
+	var userKey = configlock
+	var pad = []byte("«super jumpy fox jumps all over»")
+
+	var messagebox = strings.Join(newsplice, "")
+	messagebox = strings.TrimSuffix(messagebox, "::::")
+	var message = []byte(messagebox)
+	key := []byte(userKey)
+	key = append(key, pad...)
+	naclKey := new([keySize]byte)
+	copy(naclKey[:], key[:keySize])
+	nonce := new([nonceSize]byte)
+	// Read bytes from random and put them in nonce until it is full.
+	_, err := io.ReadFull(rand.Reader, nonce[:])
+	if err != nil {
+		return errors.New("Could not read from random: "+err.Error())
+	}
+	out := make([]byte, nonceSize)
+	copy(out, nonce[:])
+	out = secretbox.Seal(out, message, nonce, naclKey)
+	err = ioutil.WriteFile(ReturnHome()+"/."+secustom, out, 0600)
+	if err != nil {
+		return errors.New("Error while writing config file: "+err.Error())
+	}
+	fmt.Printf("Config file saved at "+ReturnHome()+"/."+secustom+" \nTotal size is %d bytes.\n", len(out))
+	return nil
 }
