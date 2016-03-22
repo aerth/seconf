@@ -82,13 +82,14 @@ func containsString(slice []string, element string) bool {
 // https://gist.github.com/albrow/5882501
 func askForConfirmation() bool {
 	var response string
+
 	_, err := fmt.Scanln(&response)
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return false
 	}
 	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
-	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	nokayResponses := []string{"n", "N", "no", "No", "NO", "\n"}
 	quitResponses := []string{"q", "Q", "exit", "quit"}
 	if containsString(okayResponses, response) {
 		return true
@@ -245,8 +246,7 @@ func Read(secustom string) (config string, err error) {
 	copy(nonce[:], in[:nonceSize])
 	configbytes, ok := secretbox.Open(nil, in[nonceSize:], nonce, naclKey)
 	if !ok {
-		fmt.Println("Could not decrypt the config file. Wrong password?")
-		return
+		return "", errors.New("Could not decrypt the config file. Wrong password?")
 	}
 	return string(configbytes), nil
 
@@ -348,4 +348,16 @@ func Lock(secustom string, servicename string, arg ...string) error {
 	}
 	fmt.Printf("Config file saved at "+ReturnHome()+"/."+secustom+" \nTotal size is %d bytes.\n", len(out))
 	return nil
+}
+
+func Destroy(secustom string) error {
+	fmt.Println("Are you sure you want to remove "+ReturnHome()+"/."+secustom+" file?")
+if askForConfirmation(){
+	if Detect(secustom) {
+	os.Remove(ReturnHome()+"/."+secustom)
+	return nil
+	}
+	return errors.New("Errorr!")
+}
+return errors.New("Error")
 }
