@@ -116,8 +116,7 @@ func posString(slice []string, element string) int {
 
 // Prompt the user for the particular field.
 func Prompt(header string) string {
-	fmt.Printf("\n### " + header + " ###\n")
-	fmt.Printf("\nPress ENTER when you are finished typing.\n\n")
+	fmt.Printf("\n" + header + ": ")
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		line := scanner.Text()
@@ -137,25 +136,28 @@ func Create(secustom string, servicename string, arg ...string) {
 		Path: secustom,
 		Args: arg,
 	}
-
+	fmt.Printf("\nCreating a new config file...\n")
 	var m1 map[int]string = map[int]string{}
 	var newsplice []string
 	for i := range configfields.Args {
 
-		if len(configfields.Args[i]) > 4 {
-			if configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
-				//		fmt.Printf("\n### " + servicename + " ###\n")
+		if len(configfields.Args[i]) > 3 {
+			if servicename == configfields.Args[i] {
+				servicename = ""
+			}
+			if strings.Contains(configfields.Args[i], "pass") || strings.Contains(configfields.Args[i], "Pass") || strings.Contains(configfields.Args[i], "Key") || strings.Contains(configfields.Args[i], "key") || configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
+				//fmt.Printf("\nPress ENTER when you are finished typing. Will not echo.\n\n")
 				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
 				if m1[i] == "" {
-					bar(secustom)
+
 					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
 				}
 				if m1[i] == "" {
-					bar(secustom)
+
 					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
 				}
 				if m1[i] == "" {
-					bar(secustom)
+
 					fmt.Println(configfields.Args[i] + " cannot be blank.")
 					return
 				}
@@ -178,13 +180,13 @@ func Create(secustom string, servicename string, arg ...string) {
 					return
 				}
 			}
-		} else {
+		} else { // Handle single non password entries
 			m1[i] = Prompt(configfields.Args[i])
 		}
 		newsplice = append(newsplice, m1[i]+"::::")
 	}
 
-	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password.")
+	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password\nConfig Password: ")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 
@@ -226,10 +228,10 @@ func Detect(secustom string) bool {
 
 // Read returns the decoded configuration file, or an error. Fields are separated by 4 colons. ("::::")
 func Read(secustom string) (config string, err error) {
-	//	bar(secustom)
+	//
 	fmt.Println("Unlocking config file")
 	configlock, err = speakeasy.Ask("Password: ")
-	//	bar(secustom)
+	//
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	key := []byte(userKey)
@@ -252,9 +254,7 @@ func Read(secustom string) (config string, err error) {
 
 // Cheap and effective way of clearing screen on unix. Ugly on windows.
 func bar(secustom string) {
-	versionbar := strings.Repeat("#", 10) + "\t" + secustom + "\t" + strings.Repeat("#", 30)
-	//print("\033[H\033[2J")
-	fmt.Println(versionbar)
+
 }
 
 // ReturnHome is a cross-OS way of getting a HOMEDIR.
@@ -282,7 +282,7 @@ func Lock(secustom string, servicename string, arg ...string) error {
 	for i := range configfields.Args {
 
 		if len(configfields.Args[i]) > 4 {
-			if configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
+			if strings.Contains(configfields.Args[i], "pass") || strings.Contains(configfields.Args[i], "Pass") || strings.Contains(configfields.Args[i], "Key") || strings.Contains(configfields.Args[i], "key") || configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
 				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
 				if m1[i] == "" {
 

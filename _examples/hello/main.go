@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	if len(os.Args) > 1 {
+	if len(os.Args) > 2 {
 		if os.Args[1] == "-d" {
 			seconf.Destroy(os.Args[2])
 			os.Exit(0)
@@ -19,9 +19,9 @@ func main() {
 			seconf.Destroy(os.Args[1])
 			os.Exit(0)
 		}
-
 	}
-	if len(os.Args) < 3 {
+
+	if len(os.Args) < 2 {
 		fmt.Println("Usage:")
 		fmt.Println(os.Args[0] + " configname servicename field1 field2 etc")
 		fmt.Println("Example:")
@@ -30,7 +30,10 @@ func main() {
 	}
 
 	s := os.Args[1]
-	sn := os.Args[2]
+	sn := "Seconf"
+	if len(os.Args) > 2 {
+		sn = os.Args[2]
+	}
 	var fields []string
 	fields = os.Args[3:]
 
@@ -54,10 +57,10 @@ func main() {
 		fmt.Println("Welcome to " + sn + ", " + configarray[0])
 		fmt.Printf("Your %s is %s \n", os.Args[3], configarray[0])
 		if len(configarray) > 1 {
-		fmt.Printf("Your %s is %s \n", os.Args[4], configarray[1])
+			fmt.Printf("Your %s is %s \n", os.Args[4], configarray[1])
 		}
 		if len(configarray) > 2 {
-		fmt.Printf("Your %s is %s \n", os.Args[5], configarray[2])
-	 	}
+			fmt.Printf("Your %s is %s \n", os.Args[5], configarray[2])
+		}
 	}
 }
