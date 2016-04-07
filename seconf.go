@@ -227,10 +227,10 @@ func Detect(secustom string) bool {
 
 // Read returns the decoded configuration file, or an error. Fields are separated by 4 colons. ("::::")
 func Read(secustom string) (config string, err error) {
-	bar(secustom)
+//	bar(secustom)
 	fmt.Println("Unlocking config file")
 	configlock, err = speakeasy.Ask("Password: ")
-	bar(secustom)
+//	bar(secustom)
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	key := []byte(userKey)
@@ -240,8 +240,7 @@ func Read(secustom string) (config string, err error) {
 	nonce := new([nonceSize]byte)
 	in, err := ioutil.ReadFile(ReturnHome() + "/." + secustom)
 	if err != nil {
-		fmt.Println(err)
-
+		return "", err
 	}
 	copy(nonce[:], in[:nonceSize])
 	configbytes, ok := secretbox.Open(nil, in[nonceSize:], nonce, naclKey)
