@@ -33,12 +33,12 @@ package seconf
 import (
 	"bufio"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
-	"errors"
 
 	"github.com/bgentry/speakeasy"
 	"golang.org/x/crypto/nacl/secretbox"
@@ -132,7 +132,7 @@ func Prompt(header string) string {
 
 // Create initializes a new configuration file, at $HOME/secustom with the title servicename and as many fields as needed. Any field starting with "pass" will be assumed a password and input will not be echoed.
 func Create(secustom string, servicename string, arg ...string) {
-	bar(servicename)
+
 	configfields := &Seconf{
 		Path: secustom,
 		Args: arg,
@@ -141,7 +141,7 @@ func Create(secustom string, servicename string, arg ...string) {
 	var m1 map[int]string = map[int]string{}
 	var newsplice []string
 	for i := range configfields.Args {
-		bar(servicename)
+
 		if len(configfields.Args[i]) > 4 {
 			if configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
 				//		fmt.Printf("\n### " + servicename + " ###\n")
@@ -163,17 +163,17 @@ func Create(secustom string, servicename string, arg ...string) {
 			} else {
 				m1[i] = Prompt(configfields.Args[i])
 				if m1[i] == "" {
-					bar(servicename)
+
 					fmt.Println("Can not be blank.")
 					m1[i] = Prompt(configfields.Args[i])
 				}
 				if m1[i] == "" {
-					bar(servicename)
+
 					fmt.Println("Can not be blank.")
 					m1[i] = Prompt(configfields.Args[i])
 				}
 				if m1[i] == "" {
-					bar(servicename)
+
 					fmt.Println(configfields.Args[i] + " cannot be blank.")
 					return
 				}
@@ -184,7 +184,6 @@ func Create(secustom string, servicename string, arg ...string) {
 		newsplice = append(newsplice, m1[i]+"::::")
 	}
 
-	bar(servicename)
 	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password.")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
@@ -227,10 +226,10 @@ func Detect(secustom string) bool {
 
 // Read returns the decoded configuration file, or an error. Fields are separated by 4 colons. ("::::")
 func Read(secustom string) (config string, err error) {
-//	bar(secustom)
+	//	bar(secustom)
 	fmt.Println("Unlocking config file")
 	configlock, err = speakeasy.Ask("Password: ")
-//	bar(secustom)
+	//	bar(secustom)
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 	key := []byte(userKey)
@@ -254,7 +253,7 @@ func Read(secustom string) (config string, err error) {
 // Cheap and effective way of clearing screen on unix. Ugly on windows.
 func bar(secustom string) {
 	versionbar := strings.Repeat("#", 10) + "\t" + secustom + "\t" + strings.Repeat("#", 30)
-	print("\033[H\033[2J")
+	//print("\033[H\033[2J")
 	fmt.Println(versionbar)
 }
 
@@ -272,7 +271,7 @@ func ReturnHome() (homedir string) {
 
 // Lock() is the new version of Create(), It returns any errors during the process instead of using os.Exit()
 func Lock(secustom string, servicename string, arg ...string) error {
-	bar(servicename)
+
 	configfields := &Seconf{
 		Path: secustom,
 		Args: arg,
@@ -281,37 +280,37 @@ func Lock(secustom string, servicename string, arg ...string) error {
 	var m1 map[int]string = map[int]string{}
 	var newsplice []string
 	for i := range configfields.Args {
-		bar(servicename)
+
 		if len(configfields.Args[i]) > 4 {
 			if configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
 				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
 				if m1[i] == "" {
-					bar(servicename)
+
 					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
 				}
 				if m1[i] == "" {
-					bar(servicename)
+
 					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
 				}
 				if m1[i] == "" {
-					bar(servicename)
+
 					return errors.New(configfields.Args[i] + " cannot be blank.")
 				}
 
 			} else {
 				m1[i] = Prompt(configfields.Args[i])
 				if m1[i] == "" {
-					bar(servicename)
+
 					fmt.Println("Can not be blank.")
 					m1[i] = Prompt(configfields.Args[i])
 				}
 				if m1[i] == "" {
-					bar(servicename)
+
 					fmt.Println("Can not be blank.")
 					m1[i] = Prompt(configfields.Args[i])
 				}
 				if m1[i] == "" {
-					bar(servicename)
+
 					return errors.New(configfields.Args[i] + " cannot be blank.")
 				}
 			}
@@ -320,7 +319,7 @@ func Lock(secustom string, servicename string, arg ...string) error {
 		}
 		newsplice = append(newsplice, m1[i]+"::::")
 	}
-	bar(servicename)
+
 	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password.")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
@@ -336,27 +335,27 @@ func Lock(secustom string, servicename string, arg ...string) error {
 	// Read bytes from random and put them in nonce until it is full.
 	_, err := io.ReadFull(rand.Reader, nonce[:])
 	if err != nil {
-		return errors.New("Could not read from random: "+err.Error())
+		return errors.New("Could not read from random: " + err.Error())
 	}
 	out := make([]byte, nonceSize)
 	copy(out, nonce[:])
 	out = secretbox.Seal(out, message, nonce, naclKey)
 	err = ioutil.WriteFile(ReturnHome()+"/."+secustom, out, 0600)
 	if err != nil {
-		return errors.New("Error while writing config file: "+err.Error())
+		return errors.New("Error while writing config file: " + err.Error())
 	}
 	fmt.Printf("Config file saved at "+ReturnHome()+"/."+secustom+" \nTotal size is %d bytes.\n", len(out))
 	return nil
 }
 
 func Destroy(secustom string) error {
-	fmt.Println("Are you sure you want to remove "+ReturnHome()+"/."+secustom+" file?")
-if askForConfirmation(){
-	if Detect(secustom) {
-	os.Remove(ReturnHome()+"/."+secustom)
-	return nil
+	fmt.Println("Are you sure you want to remove " + ReturnHome() + "/." + secustom + " file?")
+	if askForConfirmation() {
+		if Detect(secustom) {
+			os.Remove(ReturnHome() + "/." + secustom)
+			return nil
+		}
+		return errors.New("Errorr!")
 	}
-	return errors.New("Errorr!")
-}
-return errors.New("Error")
+	return errors.New("Error")
 }
