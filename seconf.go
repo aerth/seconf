@@ -80,7 +80,7 @@ func containsString(slice []string, element string) bool {
 
 // askForConfirmation returns true if the user types one of the "okayResponses"
 // https://gist.github.com/albrow/5882501
-func askForConfirmation() bool {
+func AskForConfirmation() bool {
 	var response string
 
 	_, err := fmt.Scanln(&response)
@@ -99,7 +99,7 @@ func askForConfirmation() bool {
 		return false
 	} else {
 		fmt.Println("\nNot valid answer, try again. [y/n] [yes/no]")
-		return askForConfirmation()
+		return AskForConfirmation()
 	}
 }
 
@@ -350,7 +350,7 @@ func Lock(secustom string, servicename string, arg ...string) error {
 
 func Destroy(secustom string) error {
 	fmt.Println("Are you sure you want to remove " + ReturnHome() + "/." + secustom + " file?")
-	if askForConfirmation() {
+	if AskForConfirmation() {
 		if Detect(secustom) {
 			os.Remove(ReturnHome() + "/." + secustom)
 			return nil
