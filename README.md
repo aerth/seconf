@@ -17,6 +17,10 @@ Future versions will store the values differently, using new functions, but the 
 
 I created this for GNU Social client [go-quitter](https://github.com/aerth/go-quitter), so that the username and password (and node) would not be stored in plain-text. If your app can use `seconf`, go ahead! my contact form [cosgo](https://github.com/aerth/cosgo) also uses it to store SMTP API keys.
 
+## Attention
+
+This project has not been reviewed by security professionals. Its internals, data formats, and interfaces may change at any time in the future without warning.
+
 
 ```
 
