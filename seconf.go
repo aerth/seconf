@@ -38,7 +38,9 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/bgentry/speakeasy"
 	"golang.org/x/crypto/nacl/secretbox"
@@ -81,6 +83,32 @@ func containsString(slice []string, element string) bool {
 // askForConfirmation returns true if the user types one of the "okayResponses"
 // https://gist.github.com/albrow/5882501
 func AskForConfirmation() bool {
+
+	// Hopefully a clean exit
+	interrupt := make(chan os.Signal, 1)
+	stop := make(chan os.Signal, 1)
+	reload := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+	signal.Notify(stop, syscall.SIGINT)
+	signal.Notify(reload, syscall.SIGHUP)
+	signal.Ignore(syscall.SIGSTOP)
+	go func() {
+		select {
+		case signal := <-interrupt:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-reload:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-stop:
+			fmt.Printf("Got signal:%v\n", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		}
+	}()
+
 	var response string
 
 	_, err := fmt.Scanln(&response)
@@ -116,6 +144,32 @@ func posString(slice []string, element string) int {
 
 // Prompt the user for the particular field.
 func Prompt(header string) string {
+
+	// Hopefully a clean exit
+	interrupt := make(chan os.Signal, 1)
+	stop := make(chan os.Signal, 1)
+	reload := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+	signal.Notify(stop, syscall.SIGINT)
+	signal.Notify(reload, syscall.SIGHUP)
+	signal.Ignore(syscall.SIGSTOP)
+	go func() {
+		select {
+		case signal := <-interrupt:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-reload:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-stop:
+			fmt.Printf("Got signal:%v\n", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		}
+	}()
+
 	fmt.Printf("\n" + header + ": ")
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
@@ -131,6 +185,31 @@ func Prompt(header string) string {
 
 // Create initializes a new configuration file, at $HOME/secustom with the title servicename and as many fields as needed. Any field starting with "pass" will be assumed a password and input will not be echoed.
 func Create(secustom string, servicename string, arg ...string) {
+
+	// Hopefully a clean exit
+	interrupt := make(chan os.Signal, 1)
+	stop := make(chan os.Signal, 1)
+	reload := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+	signal.Notify(stop, syscall.SIGINT)
+	signal.Notify(reload, syscall.SIGHUP)
+	signal.Ignore(syscall.SIGSTOP)
+	go func() {
+		select {
+		case signal := <-interrupt:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-reload:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-stop:
+			fmt.Printf("Got signal:%v\n", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		}
+	}()
 
 	configfields := &Seconf{
 		Path: secustom,
@@ -219,6 +298,7 @@ func Create(secustom string, servicename string, arg ...string) {
 
 // Detect returns TRUE if a seconf file exists.
 func Detect(secustom string) bool {
+
 	_, err := ioutil.ReadFile(ReturnHome() + "/." + secustom)
 	if err != nil {
 		return false
@@ -228,6 +308,32 @@ func Detect(secustom string) bool {
 
 // Read returns the decoded configuration file, or an error. Fields are separated by 4 colons. ("::::")
 func Read(secustom string) (config string, err error) {
+
+	// Hopefully a clean exit
+	interrupt := make(chan os.Signal, 1)
+	stop := make(chan os.Signal, 1)
+	reload := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+	signal.Notify(stop, syscall.SIGINT)
+	signal.Notify(reload, syscall.SIGHUP)
+	signal.Ignore(syscall.SIGSTOP)
+	go func() {
+		select {
+		case signal := <-interrupt:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-reload:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-stop:
+			fmt.Printf("Got signal:%v\n", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		}
+	}()
+
 	//
 	fmt.Println("Unlocking config file")
 	configlock, err = speakeasy.Ask("Password: ")
