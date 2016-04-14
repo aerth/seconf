@@ -7,7 +7,7 @@
 [(Example)](https://github.com/aerth/seconf/blob/master/_examples/hello/main.go)
 
 
-seconf saves the configuration file as a `::::` separated list. for the encryption, i chose [(nacl/secretbox)](http://nacl.cr.yp.to/secretbox.html). theres a simple default pad that allows "empty" passwords. we use [bgentry/speakeasy](https://github.com/bgentry/speakeasy) for accepting user input for fields that start with "pass".
+seconf saves the configuration file as a `::::` separated list. for the encryption, i chose [(nacl/secretbox)](http://nacl.cr.yp.to/secretbox.html). theres a simple default pad that allows "empty" passwords. we use [bgentry/speakeasy](https://github.com/bgentry/speakeasy) for accepting user input for fields that contain "pass" or "key".
 
 ```
 Secretbox uses XSalsa20 and Poly1305 to encrypt and authenticate messages with secret-key cryptography.
@@ -15,7 +15,9 @@ Secretbox uses XSalsa20 and Poly1305 to encrypt and authenticate messages with s
 
 Future versions will store the values differently, using new functions, but the legacy functions will remain.
 
-I created this for GNU Social client [go-quitter](https://github.com/aerth/go-quitter), so that the username and password (and node) would not be stored in plain-text. If your app can use `seconf`, go ahead! my contact form [cosgo](https://github.com/aerth/cosgo) also uses it to store SMTP API keys.
+  * [go-quitter](https://github.com/aerth/go-quitter) for user, password, node URL.
+  * [secenv](https://github.com/aerth/secenv) for user environment export seconf variables to shell
+  * My contact form server, [cosgo](https://github.com/aerth/cosgo), uses seconf to store SMTP API keys and configuration fields.
 
 ## Attention
 
