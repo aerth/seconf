@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// package seconf allows your software to store non-plaintext configuration files.
+// Package seconf allows your software to store non-plaintext configuration files.
 //
 // check out the example application in _examples/hello for a working example.
 //
@@ -53,6 +53,7 @@ const nonceSize = 24
 var secustom string
 var username string
 var password string
+
 var hashbar = strings.Repeat("#", 80)
 
 var configuser = ""
@@ -62,10 +63,13 @@ var configlock = ""
 
 // Seconf is the struct for the seconf pathname and fields.
 type Seconf struct {
-	Id   int64
+	ID   int64
 	Path string
 	Args []string
 }
+
+// NoBlank can be toggled to require a non-blank string for each field.
+var NoBlank bool = false
 
 /*
 type Fielder struct {
@@ -80,7 +84,8 @@ func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
 
-// askForConfirmation returns true if the user types one of the "okayResponses"
+// AskForConfirmation returns true if the user types one of the "okayResponses"
+// See also: ConfirmChoice()
 // https://gist.github.com/albrow/5882501
 func AskForConfirmation() bool {
 
@@ -91,7 +96,6 @@ func AskForConfirmation() bool {
 	signal.Notify(interrupt, os.Interrupt)
 	signal.Notify(stop, syscall.SIGINT)
 	signal.Notify(reload, syscall.SIGHUP)
-	signal.Ignore(syscall.SIGSTOP)
 	go func() {
 		select {
 		case signal := <-interrupt:
@@ -131,20 +135,8 @@ func AskForConfirmation() bool {
 	}
 }
 
-// posString returns the first index of element in slice.
-// If slice does not contain element, returns -1.
-func posString(slice []string, element string) int {
-	for index, elem := range slice {
-		if elem == element {
-			return index
-		}
-	}
-	return -1
-}
-
-// Prompt the user for the particular field.
-func Prompt(header string) string {
-
+// ConfirmChoice is like AskForConfirmation but with a default answer.
+func ConfirmChoice(prompt string, def bool) bool {
 	// Hopefully a clean exit
 	interrupt := make(chan os.Signal, 1)
 	stop := make(chan os.Signal, 1)
@@ -152,7 +144,7 @@ func Prompt(header string) string {
 	signal.Notify(interrupt, os.Interrupt)
 	signal.Notify(stop, syscall.SIGINT)
 	signal.Notify(reload, syscall.SIGHUP)
-	signal.Ignore(syscall.SIGSTOP)
+
 	go func() {
 		select {
 		case signal := <-interrupt:
@@ -170,7 +162,73 @@ func Prompt(header string) string {
 		}
 	}()
 
-	fmt.Printf("\n" + header + ": ")
+	var response string
+	fmt.Println(prompt)
+	if def {
+		fmt.Printf("[Y/n] ")
+	}
+	if !def {
+		fmt.Printf("[y/N] ")
+	}
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		//fmt.Println(err)
+
+	}
+	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	quitResponses := []string{"q", "Q", "exit", "quit"}
+	if containsString(okayResponses, response) {
+		def = true
+	} else if containsString(nokayResponses, response) {
+		def = false
+	} else if containsString(quitResponses, response) {
+		os.Exit(1)
+	}
+	return def
+
+}
+
+// posString returns the first index of element in slice.
+// If slice does not contain element, returns -1.
+func posString(slice []string, element string) int {
+	for index, elem := range slice {
+		if elem == element {
+			return index
+		}
+	}
+	return -1
+}
+
+// Prompt the user for the particular field.
+func Prompt(prompt string) string {
+
+	// Hopefully a clean exit
+	interrupt := make(chan os.Signal, 1)
+	stop := make(chan os.Signal, 1)
+	reload := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+	signal.Notify(stop, syscall.SIGINT)
+	signal.Notify(reload, syscall.SIGHUP)
+
+	go func() {
+		select {
+		case signal := <-interrupt:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-reload:
+			fmt.Println("Got signal:", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		case signal := <-stop:
+			fmt.Printf("Got signal:%v\n", signal)
+			fmt.Println("Dying")
+			os.Exit(0)
+		}
+	}()
+
+	fmt.Printf(prompt + ": ")
 	scanner := bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		line := scanner.Text()
@@ -178,7 +236,7 @@ func Prompt(header string) string {
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Println(err)
-		return Prompt(header)
+		return Prompt(prompt)
 	}
 	return ""
 }
@@ -193,12 +251,12 @@ func Create(secustom string, servicename string, arg ...string) {
 	signal.Notify(interrupt, os.Interrupt)
 	signal.Notify(stop, syscall.SIGINT)
 	signal.Notify(reload, syscall.SIGHUP)
-	signal.Ignore(syscall.SIGSTOP)
 	go func() {
 		select {
 		case signal := <-interrupt:
 			fmt.Println("Got signal:", signal)
 			fmt.Println("Dying")
+
 			os.Exit(0)
 		case signal := <-reload:
 			fmt.Println("Got signal:", signal)
@@ -215,7 +273,6 @@ func Create(secustom string, servicename string, arg ...string) {
 		Path: secustom,
 		Args: arg,
 	}
-	fmt.Printf("\nCreating a new config file...\n")
 	var m1 map[int]string = map[int]string{}
 	var newsplice []string
 	for i := range configfields.Args {
@@ -226,37 +283,42 @@ func Create(secustom string, servicename string, arg ...string) {
 			}
 			if strings.Contains(configfields.Args[i], "pass") || strings.Contains(configfields.Args[i], "Pass") || strings.Contains(configfields.Args[i], "Key") || strings.Contains(configfields.Args[i], "key") || configfields.Args[i][0:4] == "pass" || configfields.Args[i][0:4] == "Pass" {
 				//fmt.Printf("\nPress ENTER when you are finished typing. Will not echo.\n\n")
-				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
-				if m1[i] == "" {
+				m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + " ")
+				if NoBlank == true {
+					if m1[i] == "" {
 
-					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
-				}
-				if m1[i] == "" {
+						m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
+					}
+					if m1[i] == "" {
 
-					m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
-				}
-				if m1[i] == "" {
+						m1[i], _ = speakeasy.Ask(servicename + " " + configfields.Args[i] + ": ")
+					}
+					if m1[i] == "" {
 
-					fmt.Println(configfields.Args[i] + " cannot be blank.")
-					return
+						fmt.Println(configfields.Args[i] + " cannot be blank.")
+						return
+					}
 				}
 
 			} else {
 				m1[i] = Prompt(configfields.Args[i])
-				if m1[i] == "" {
+				if NoBlank == true {
 
-					fmt.Println("Can not be blank.")
-					m1[i] = Prompt(configfields.Args[i])
-				}
-				if m1[i] == "" {
+					if m1[i] == "" {
 
-					fmt.Println("Can not be blank.")
-					m1[i] = Prompt(configfields.Args[i])
-				}
-				if m1[i] == "" {
+						fmt.Println("Can not be blank.")
+						m1[i] = Prompt(configfields.Args[i])
+					}
+					if m1[i] == "" {
 
-					fmt.Println(configfields.Args[i] + " cannot be blank.")
-					return
+						fmt.Println("Can not be blank.")
+						m1[i] = Prompt(configfields.Args[i])
+					}
+					if m1[i] == "" {
+
+						fmt.Println(configfields.Args[i] + " cannot be blank.")
+						return
+					}
 				}
 			}
 		} else { // Handle single non password entries
@@ -265,7 +327,7 @@ func Create(secustom string, servicename string, arg ...string) {
 		newsplice = append(newsplice, m1[i]+"::::")
 	}
 
-	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password\nConfig Password: ")
+	configlock, _ = speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password\nConfig Password: ")
 	var userKey = configlock
 	var pad = []byte("«super jumpy fox jumps all over»")
 
@@ -316,7 +378,7 @@ func Read(secustom string) (config string, err error) {
 	signal.Notify(interrupt, os.Interrupt)
 	signal.Notify(stop, syscall.SIGINT)
 	signal.Notify(reload, syscall.SIGHUP)
-	signal.Ignore(syscall.SIGSTOP)
+
 	go func() {
 		select {
 		case signal := <-interrupt:
@@ -334,16 +396,10 @@ func Read(secustom string) (config string, err error) {
 		}
 	}()
 
-	//
-	fmt.Println("Unlocking config file")
-	configlock, err = speakeasy.Ask("Password: ")
-	//
-	var userKey = configlock
+	// This is the default encoded-but-not-safe blank password
 	var pad = []byte("«super jumpy fox jumps all over»")
-	key := []byte(userKey)
-	key = append(key, pad...)
 	naclKey := new([keySize]byte)
-	copy(naclKey[:], key[:keySize])
+	copy(naclKey[:], pad[:keySize])
 	nonce := new([nonceSize]byte)
 	in, err := ioutil.ReadFile(ReturnHome() + "/." + secustom)
 	if err != nil {
@@ -351,15 +407,28 @@ func Read(secustom string) (config string, err error) {
 	}
 	copy(nonce[:], in[:nonceSize])
 	configbytes, ok := secretbox.Open(nil, in[nonceSize:], nonce, naclKey)
+	if ok {
+		return string(configbytes), nil
+	}
+
+	// The blank password didn't work. Ask the user via speakeasy
+	configlock, err = speakeasy.Ask("Password: ")
+	var userKey = configlock
+	key := []byte(userKey)
+	key = append(key, pad...)
+	naclKey = new([keySize]byte)
+	copy(naclKey[:], key[:keySize])
+	nonce = new([nonceSize]byte)
+	in, err = ioutil.ReadFile(ReturnHome() + "/." + secustom)
+	if err != nil {
+		return "", err
+	}
+	copy(nonce[:], in[:nonceSize])
+	configbytes, ok = secretbox.Open(nil, in[nonceSize:], nonce, naclKey)
 	if !ok {
 		return "", errors.New("Could not decrypt the config file. Wrong password?")
 	}
 	return string(configbytes), nil
-
-}
-
-// Cheap and effective way of clearing screen on unix. Ugly on windows.
-func bar(secustom string) {
 
 }
 
@@ -373,6 +442,11 @@ func ReturnHome() (homedir string) {
 		homedir = os.Getenv("HOME")
 	}
 	return
+}
+
+// Locate uses ReturnHome to produce the location of the config file
+func Locate(secustom string) (location string) {
+	return ReturnHome() + "/." + secustom
 }
 
 // Lock() is the new version of Create(), It returns any errors during the process instead of using os.Exit()
