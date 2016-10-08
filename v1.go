@@ -16,6 +16,32 @@ import (
 	"golang.org/x/crypto/nacl/secretbox"
 )
 
+const keySize = 32
+const nonceSize = 24
+
+var pad = []byte("«lotsa jumPy f0x jump5 a11 ov3r»")
+
+var hashbar = strings.Repeat("#", 80)
+
+// Seconf is the struct for the seconf pathname and fields.
+type Seconf struct {
+	ID     int64
+	Path   string
+	Args   []string
+	Fields map[string]string
+}
+
+// NoBlank can be toggled to require a non-blank string for each field.
+var NoBlank bool = false
+
+/*
+type Fielder struct {
+	Id       int64
+	Name     string
+	Password bool
+}
+*/
+
 // returnHome is a cross-OS way of getting a HOMEDIR.
 func returnHome() (homedir string) {
 	homedir = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
@@ -201,7 +227,7 @@ func Create(secustom string, servicename string, arg ...string) {
 		newsplice = append(newsplice, m1[k]+"::::")
 	}
 
-	configlock, _ = speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password\nConfig Password: ")
+	configlock, _ := speakeasy.Ask("Create a password to encrypt config file:\nPress ENTER for no password\nConfig Password: ")
 	var userKey = configlock
 
 	var messagebox = strings.Join(newsplice, "")
@@ -260,8 +286,8 @@ func Read(secustom string) (config string, err error) {
 	}
 
 	// The blank password didn't work. Ask the user via speakeasy
-	configlock, err = speakeasy.Ask("Password: ")
-	var userKey = configlock
+	userKey, err := speakeasy.Ask("Password: ")
+
 	key := []byte(userKey)
 	key = append(key, pad...)
 	naclKey = new([keySize]byte)
@@ -280,42 +306,6 @@ func Read(secustom string) (config string, err error) {
 	return string(configbytes), nil
 
 }
-
-const keySize = 32
-const nonceSize = 24
-
-var pad = []byte("«lotsa jumPy f0x jump5 a11 ov3r»")
-
-// secustom is the filename that gets stored. for example, if secustom is "test", the configuration file will be saved as $HOME/.test
-var secustom string
-var username string
-var password string
-
-var hashbar = strings.Repeat("#", 80)
-
-var configuser = ""
-var configpass = ""
-
-var configlock = ""
-
-// Seconf is the struct for the seconf pathname and fields.
-type Seconf struct {
-	ID     int64
-	Path   string
-	Args   []string
-	Fields map[string]string
-}
-
-// NoBlank can be toggled to require a non-blank string for each field.
-var NoBlank bool = false
-
-/*
-type Fielder struct {
-	Id       int64
-	Name     string
-	Password bool
-}
-*/
 
 // constainsString returns true if a slice contains a string.
 func containsString(slice []string, element string) bool {
