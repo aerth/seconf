@@ -137,6 +137,11 @@ func Lock(secustom string, servicename string, arg ...string) error {
 	return nil
 }
 
+// Pad sets the default pad, used to increase password length.
+func Pad(s string) {
+	pad = []byte(s)
+}
+
 // Create initializes a new configuration file,
 // at $HOME/secustom with the title servicename and
 // as many fields as needed. Any field starting with
