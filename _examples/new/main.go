@@ -10,7 +10,7 @@ import (
 func main() {
 	filename := "se.conf"
 	header := "Seconf"
-	// []string of fields, they are both the prompt and key for looking the fields back up.
+	// map[string]string of fields, they are both the prompt (for entry) and key (for looking the fields back up).
 	fields := map[string]string{
 		"name":           "What is your name?",
 		"favorite-color": "What is your favorite color?",
